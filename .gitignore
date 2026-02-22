@@ -1,4 +1,18 @@
-.Rproj.user
+# R session history and environment
 .Rhistory
 .RData
-.Ruserdata
+.Rdata
+.rda
+
+# Temporary R files
+*.Rproj.user
+
+# RStudio project user settings (machine-specific)
+.Rproj.user/
+
+# Dataset CSVs are large — download via DATA.md
+data/
+
+# OS artefacts
+.DS_Store
+Thumbs.db

@@ -2,24 +2,19 @@
 rm(list = ls())
 
 #### SET WORKING DIRECTORY ####
-getwd()
-setwd("C:/Users/Rafael/Desktop/Data Analysis/Course 3 - Deep Analytics and Visualization 2017/Task 3/Files")
+# Uses the here package to resolve paths relative to the .Rproj file
+# so this script works on any machine without editing paths.
+library(here)
+getwd()  # should point to the project root
 set.seed(123)
 
 #### LOAD LIBRARIES ####
-library(lubridate)
 library(caret)
 library(readr)
-library(corrplot)
-library(reshape2)
-library(ggcorrplot)
 library(dplyr)
 library(tidyr)
 library(data.table)
-library(forecast)
-library(rworldmap)
-library(rgdal)
-library(arsenal)
+library(ggplot2)
 library(RWeka)
 
 
@@ -29,8 +24,8 @@ library(RWeka)
 
 #### TRAINING SET ####
 
-#Load file
-training <- fread("trainingData.csv", sep = ",", stringsAsFactors = FALSE)
+#Load file — dataset must be placed in the data/ folder (see DATA.md)
+training <- fread(here("data", "trainingData.csv"), sep = ",", stringsAsFactors = FALSE)
 
 
 #converts to a tibble
@@ -40,7 +35,7 @@ training <- as_tibble(training)
 #### VALIDATION SET ####
 
 #Load file
-validation <- fread("validationData.csv", sep = ",", stringsAsFactors = FALSE)
+validation <- fread(here("data", "validationData.csv"), sep = ",", stringsAsFactors = FALSE)
 
 
 #converts to a tibble
@@ -262,7 +257,7 @@ combinedSets_normalized_bycol <- cbind(combinedSets_wap_normalized_bycol, combin
 
 #### Creates normalized wap values for viewing ####
 wap_values_norm_all <- c(as.matrix(combinedSets_wap_normalized_all))
-wap_values_nrom_byrow <- c(as.matrix(combinedSets_wap_normalized_byrow))
+wap_values_norm_byrow <- c(as.matrix(combinedSets_wap_normalized_byrow))
 wap_values_nrom_bycol <- c(as.matrix(combinedSets_wap_normalized_bycol))
 
 

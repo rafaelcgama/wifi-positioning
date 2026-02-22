@@ -1,50 +1,37 @@
-m#### DELETES GLOBAL ENV VARIABLES ####
+#### DELETES GLOBAL ENV VARIABLES ####
 rm(list = ls())
 
 #### SET WORKING DIRECTORY ####
-getwd()
-setwd("C:/Users/Rafael/Desktop/Data Analysis/Course 3 - Deep Analytics and Visualization 2017/Task 3/Files")
+# Uses the here package to resolve paths relative to the .Rproj file
+# so this script works on any machine without editing paths.
+# If you don't have 'here', run: install.packages("here")
+library(here)
+getwd()  # should point to the project root
 set.seed(123)
 
 #### LOAD LIBRARIES ####
-library(lubridate)
 library(caret)
 library(readr)
-library(corrplot)
-library(reshape2)
-library(ggcorrplot)
 library(dplyr)
 library(tidyr)
 library(data.table)
-library(forecast)
-library(rworldmap)
-library(rgdal)
-library(arsenal)
+library(ggplot2)
 library(RWeka)
 library(ggthemes)
-library(ggvis)
-library(rgl)
 library(plotly)
-library(googleVis)
-library(randomForest)
-library(multcomp)
-library(vcd)
-library(glmnet)
-library(shiny)
-library(ggmap)
-library(Rserve)
+library(e1071)
 
-#Install all libraries 
-#lubridate, caret, readr, dplyr, data.table, forecast, rworldmap, rgdal, RWeka, ggthemes, rgl, plotly, googleVis, randomForest, multcomp, vcd, glmnet, shiny, ggmap, corrplot, ggcorrplot, arsenal, ggvis, Rserve, e1071
+#Install required libraries:
+#install.packages(c("here", "caret", "readr", "dplyr", "tidyr",
+#                   "data.table", "ggplot2", "RWeka", "ggthemes", "plotly", "e1071"))
 
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #### LOAD DATA ####
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 #### TRAINING SET ####
 
-#Load file
-training <- fread("trainingData.csv", sep = ",", stringsAsFactors = FALSE)
+#Load file — dataset must be placed in the data/ folder (see DATA.md)
+training <- fread(here("data", "trainingData.csv"), sep = ",", stringsAsFactors = FALSE)
 
 #converts to a tibble
 training <- as_tibble(training)
@@ -53,7 +40,7 @@ training <- as_tibble(training)
 #### VALIDATION SET ####
 
 #Load file
-validation <- fread("validationData.csv", sep = ",", stringsAsFactors = FALSE)
+validation <- fread(here("data", "validationData.csv"), sep = ",", stringsAsFactors = FALSE)
 
 #converts to a tibble
 validation <- as_tibble(validation)

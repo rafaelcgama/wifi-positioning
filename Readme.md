@@ -1,91 +1,183 @@
-# **Wi-Fi Positioning**
-![](/images/dom_jaime.png)
+# Wi-Fi Indoor Positioning
 
-## _Objective_
-The goal of this project is to explore the [UJIIndoorLoc](https://archive.ics.uci.edu/ml/datasets/ujiindoorloc) dataset provided by the **UC Irvine Machine Learning Repository** and apply machine learning techniques to predict the location of a user in a university campus based on the intensity of the signals received by different wireless access points across campus from the user's Wi-Fi device.
+![Universitat Jaume I](images/dom_jaime.png)
 
-## _Background_
+![R](https://img.shields.io/badge/Language-R-276DC3?logo=r&logoColor=white)
+![Dataset](https://img.shields.io/badge/Dataset-UJIIndoorLoc-orange)
+![ML](https://img.shields.io/badge/Task-Classification%20%26%20Regression-blueviolet)
+![Status](https://img.shields.io/badge/Status-Portfolio%20Project-lightgrey)
 
-Many real world applications need to know the localization of a user in the world to provide their services. Therefore, automatic user localization has been a hot research topic in the last years. Automatic user localization consists of estimating the position of the user (latitude, longitude and altitude) by using an electronic device, usually a mobile phone. Outdoor localization problem can be solved very accurately thanks to the inclusion of GPS sensors into the mobile devices. However, indoor localization is still an open problem mainly due to the loss of GPS signal in indoor environments. Although, there are some indoor positioning technologies and methodologies, this database is focused on WLAN fingerprint-based ones (also know as Wi-Fi Fingerprinting). 
+> Predicting a user's indoor location (building, floor, latitude, longitude) from Wi-Fi signal strength fingerprints using KNN, SVM, and C5.0 models in R.
 
-## _Dataset_
+---
 
-The UJIIndoorLoc database covers three buildings of Universitat Jaume I, in Spain, with 4 or 5 floors. It was created in 2013 by means of more than 20 different users and 25 Android devices. The database consists of 2 files, one containing 19937 training/reference records `trainingData.csv` and other containing 1111 validation/test records `validationData.csv`. Both sets are composed  of 529 attributes that are described below:
+## Objective
 
+The goal of this project is to explore the [UJIIndoorLoc](https://archive.ics.uci.edu/ml/datasets/ujiindoorloc) dataset provided by the **UC Irvine Machine Learning Repository** and apply machine learning techniques to predict the location of a user in a university campus based on the intensity of the signals received by different wireless access points (WAPs) across campus from the user's Wi-Fi device.
 
-### Attribute Information:
+---
 
-* **Attribute 001 (WAP001) - 520 (WAP520)**: Negative integer values from -104 to 0 and +100. Positive value 100 used if signal was not detected. The closer to zero the better.
-* **Attribute 521 (Longitude)**: Longitude. Negative real values from -7695.9387549299299000 to -7299.786516730871000 
-* **Attribute 522 (Latitude)**: Latitude. Positive real values from 4864745.7450159714 to 4865017.3646842018. 
-* **Attribute 523 (Floor)**: Altitude in floors inside the building. Integer values from 0 to 4. 
-* **Attribute 524 (BuildingID)**: ID to identify the building. Measures were taken in three different buildings. Categorical integer values from 0 to 2. 
-* **Attribute 525 (SpaceID)**: Internal ID number to identify the Space (office, corridor, classroom) where the capture was taken. Categorical integer values. 
-* **Attribute 526 (RelativePosition)**: Relative position with respect to the Space (1 - Inside, 2 - Outside in Front of the door). Categorical integer values. 
-* **Attribute 527 (UserID)**: User identifier (see below). Categorical integer values. 
-* **Attribute 528 (PhoneID)**: Android device identifier (see below). Categorical integer values. 
-* **Attribute 529 (Timestamp)**: UNIX Time when the capture was taken. Integer value. 
+## Background
 
+Many real-world applications need to know the localization of a user to provide their services. Outdoor localization is solved accurately via GPS, but **indoor localization** remains an open problem due to GPS signal loss inside buildings. This project uses **WLAN fingerprint-based positioning** — measuring the signal strengths from many access points at different known locations, then learning a model that maps signal patterns to physical positions.
 
-## _**Data Preparation**_
+---
 
-Before the machine learning models were applied to the dataset, a few modifications were made to the dataset in order to make it more concise and remove noise. The main ones are described below:
+## Dataset
 
-* **Converted low and undetected signals to -100**: all undetected signals (value 100) and signal below -90 were converted to -100 to bring consistency  to very bad signals.
-* **Removed all WAPs (column) and records (row) with zero variance values**: If a WAP does not detect signal strengths  variations is not useful to make predictions. Same rationale  applies to instances that always provide the same signal to all WAPs.
-* **Removed all Users with duplicate signal footprint**: It is needless to have more than one observations stating the same thing.
-* **Converted signals higher than -30 to -100**: Signals higher than -30 are considered prefect but they are not typical or desirable in the real world so they were considered errors and modified to -100(very bad signal)
-* **Removed User 6**: User 6 appears in 976 records of which 430 are between -30 and 0, which means that his device was probably buggy or had some sort of compatibility issue.
-* **Normalized by row**: Dataset was normalized by row, columns and by overall values but the normalization by row was used for the modeling as it generated better results.
-* **3000 records were sampled to apply the models**: Out of the 19937 records, 3000 were sampled and then partitioned into training/testing sets on a 75/25 ratio.
+The **UJIIndoorLoc** database covers three buildings of Universitat Jaume I (Spain) with 4–5 floors each, collected in 2013 using 20+ users and 25 Android devices.
 
+| File | Records | Description |
+|---|---|---|
+| `trainingData.csv` | 19,937 | Training / reference observations |
+| `validationData.csv` | 1,111 | Held-out test observations |
 
-## _**Results**_
+Each record has **529 attributes**:
 
-### _**Building and Floor**_
+| Attributes | Description |
+|---|---|
+| WAP001–WAP520 | Signal strength (dBm). Range: −104 to 0 (detected) or 100 (not detected) |
+| LONGITUDE | Longitude coordinate |
+| LATITUDE | Latitude coordinate |
+| FLOOR | Floor number (0–4) |
+| BUILDINGID | Building identifier (0–2) |
+| SPACEID | Room/corridor ID |
+| RELATIVEPOSITION | Inside (1) or outside door (2) |
+| USERID | User identifier |
+| PHONEID | Android device identifier |
+| TIMESTAMP | UNIX timestamp of capture |
 
-The first step was to train models to predict the just the building based on the WAPs signal strength. Once the building was predicted, those results were added to the dataset and then the data was filtered by building in order to predict the floor in that particular building. The results for the training and validation sets were as follow:
+---
 
+## How to Run
 
-|                    | KNN   | SVM   | SVM3  | C.50  |
-|--------------------|-------|-------|-------|-------|
-| Building           | 0.984 | 1.000 | 1.000 | 0.999 |
-| Floor - Building 0 | 0.948 | 0.976 | 0.948 | 0.970 |
-| Floor - Building 1 | 0.959 | 1.000 | 0.984 | 0.970 |
-| Floor - Building 2 | 0.950 | 0.982 | 0.979 | 0.970 |
+### 1. Download the Dataset
 
+The CSVs are not included in this repository (size ~110 MB). Download them from the UCI repository:
 
+👉 [**Download UJIIndoorLoc Dataset**](https://archive.ics.uci.edu/ml/machine-learning-databases/00310/)
 
-As we can see, we achieved a 100% prediction for the building and SVM yielded the best floor results in the training/validation phase. Therefore, it was the model selected to move to the test phase and it achieved the following success  rates:
+Place the two CSV files inside a `data/` folder in the project root:
 
-![](/images/floor_results2.PNG)
+```
+wifi-positioning/
+└── data/
+    ├── trainingData.csv
+    └── validationData.csv
+```
 
+### 2. Install R Dependencies
 
-### _**Latitude and Longitude**_
+Open R (or RStudio) and install the required packages:
 
-To predict Latitude and Longitude, the same steps used to build the models for the Building and Floor were applied. The only difference was that some parameters were modified in order to reflect the regression nature of this prediction. First we predicted the Lat & Long for the whole campus based on the WAP signal strength and then we reapplied the models filtering the data by building as we did previously. The follow results were achieved:
+```r
+install.packages(c("here", "caret", "readr", "dplyr", "tidyr",
+                   "data.table", "ggplot2", "RWeka", "ggthemes", "e1071"))
+```
 
+> **Note:** The `RWeka` package requires Java. Install a JDK and run `options(java.parameters = "-Xmx4g")` before loading it if you encounter memory errors.
 
-| RSME                   | KNN   | SVM    | SVM3      |
-|------------------------|-------|--------|-----------|
-| LATITUDE               | 7.068 | 18.867 | 4.861E+06 |
-| LONGITUDE              | 6.646 | 32.197 | 7.470E+03 |
-|                        |       |        |           |
-| LATITUDE - BUILDING 0  | 6.101 | 10.180 | 4.867E+06 |
-| LONGITUDE - BUILDING 0 | 5.490 | 12.042 | 7.653E+03 |
-|                        |       |        |           |
-| LATITUDE - BUILDING 1  | 7.068 | 12.608 | 4.861E+06 |
-| LONGITUDE - BUILDING 1 | 7.769 | 14.149 | 7.485E+03 |
-|                        |       |        |           |
-| LATITUDE - BUILDING 2  | 7.484 | 14.175 | 4.862E+06 |
-| LONGITUDE - BUILDING 2 | 7.235 | 14.671 | 7.36E+03  |
+### 3. Run the Analysis
 
+Open the project in RStudio by double-clicking `wifi-positioning.Rproj`, then open and run:
 
-This time the KNN performed significantly better than the other models, hence it was the one chosen to be applied to the test set. After we collected the results of the Lat & Long predictions, the Euclidian distance between the actual and predicted geographic coordinates was calculated in order to get the amount of error in each prediction, as well as the mean and the median of all points. Now let's plot the actual and the predicted coordinates and compare them:
+```
+wifi_positioning_analysis.R
+```
 
-![](/images/actual.jpg)
+The script is fully self-contained and runs end-to-end: data loading → wrangling → normalisation → model training → validation.
 
+---
 
-![](/images/predicted.jpg)
+## Data Preparation
 
-As we can see, the shape of the 2 plots are fairly similar which means that we achieved a decent degree of accuracy in our model.  
+Before modelling, the following cleaning steps were applied:
+
+| Step | Rationale |
+|---|---|
+| Converted undetected signals (100) and signals ≤ −90 to −100 | Brings consistency to very weak signals |
+| Removed zero-variance WAP columns | WAPs with no variation across observations carry no information |
+| Removed duplicate rows | Avoids redundant training signal |
+| Removed User 6 | 430 out of 976 observations had anomalously strong signals — likely a faulty device |
+| Capped signals above −30 dBm to −100 | Perfect signals are unrealistic and treated as measurement errors |
+| Normalised by row | Chosen over column-wise and global normalisation after comparing model performance |
+| Sampled 3,000 training records | SVM is computationally expensive on 520-dimensional data; sampling preserves representativeness |
+
+---
+
+## Results
+
+### Building & Floor Classification
+
+Models were trained on the full campus first (building prediction), then per-building (floor prediction). SVM achieved the best overall accuracy:
+
+|  | KNN | SVM | SVM3 | C5.0 |
+|---|---|---|---|---|
+| **Building** | 0.984 | 1.000 | 1.000 | 0.999 |
+| **Floor – Building 0** | 0.948 | 0.976 | 0.948 | 0.970 |
+| **Floor – Building 1** | 0.959 | 1.000 | 0.984 | 0.970 |
+| **Floor – Building 2** | 0.950 | 0.982 | 0.979 | 0.970 |
+
+SVM achieved **100% building accuracy** and the best floor prediction rates, so it was selected for the final validation phase.
+
+![Floor prediction results on the test set](images/floor_results2.PNG)
+
+### Latitude & Longitude Regression
+
+The same hierarchical approach (whole campus → per building) was applied for coordinate regression. KNN significantly outperformed SVM on this task:
+
+| RMSE | KNN | SVM |
+|---|---|---|
+| **Latitude** | 7.07 | 18.87 |
+| **Longitude** | 6.65 | 32.20 |
+| **Latitude – Building 0** | 6.10 | 10.18 |
+| **Longitude – Building 0** | 5.49 | 12.04 |
+| **Latitude – Building 1** | 7.07 | 12.61 |
+| **Longitude – Building 1** | 7.77 | 14.15 |
+| **Latitude – Building 2** | 7.48 | 14.18 |
+| **Longitude – Building 2** | 7.24 | 14.67 |
+
+After collecting predicted coordinates, the **Euclidean distance** between actual and predicted positions was calculated. Comparing the scatter plots below confirms a good degree of positional accuracy — the predicted layout closely mirrors the actual campus shape.
+
+**Actual coordinates:**
+
+![Actual coordinates on campus](images/actual.jpg)
+
+**Predicted coordinates:**
+
+![Predicted coordinates on campus](images/predicted.jpg)
+
+---
+
+## Project Structure
+
+```
+wifi-positioning/
+├── images/                         # Result plots (floor accuracy, coordinate maps)
+├── All Code.R                      # Consolidated end-to-end analysis
+├── Data Wrangling.r                # Data loading & preprocessing steps
+├── Building.r                      # Building classification models
+├── Floor.R                         # Floor classification (whole campus)
+├── Floor - Building 0.R            # Floor classification – Building 0
+├── Floor - Building 1.R            # Floor classification – Building 1
+├── Floor - Building 2.R            # Floor classification – Building 2
+├── Latitude.R                      # Latitude regression (whole campus)
+├── Latitude - Building 0.R         # Latitude regression – Building 0
+├── Latitude - Building 1.R         # Latitude regression – Building 1
+├── Latitude - Building 2.R         # Latitude regression – Building 2
+├── Longitude.R                     # Longitude regression (whole campus)
+├── Longitude - Building 0.R        # Longitude regression – Building 0
+├── Longitude - Building 1.R        # Longitude regression – Building 1
+├── Longitude - Building 2.R        # Longitude regression – Building 2
+├── Lat_Long - Error.R              # Euclidean error analysis
+├── wifi_positioning_analysis.R     # Cleaned-up consolidated script
+├── dataset_link.md                 # Dataset download instructions & citation
+├── wifi-positioning.Rproj          # RStudio project file
+└── README.md
+```
+
+---
+
+## License
+
+Dataset: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — Joaquín Torres-Sospedra et al., 2014.
